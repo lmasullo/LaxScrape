@@ -1,0 +1,11 @@
+{
+  "development": {
+    "MONGODB_URI": "mongodb://localhost/laxnews"
+  },
+  "test": {
+    "MONGODB_URI": "mongodb://localhost/laxnews"
+  },
+  "production": {
+    "MONGODB_URI": "process.env.MONGODB_URI"
+  }
+}
