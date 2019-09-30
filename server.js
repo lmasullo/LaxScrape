@@ -31,7 +31,7 @@ app.use(express.static('public'));
 //! Connect to the Mongo DB **********************************************
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://localhost:27017/laxnews';
+  process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/laxnews';
 
 // const MONGODB_URI =
 // process.env.MONGODB_URI;
@@ -41,7 +41,7 @@ const MONGODB_URI =
 //   useUnifiedTopology: true,
 // });
 
-console.log(process.env.MONGODB_URI_LOCAL);
+console.log(MONGODB_URI);
 
 // mongoose.connect('mongodb://127.0.0.1:27017/laxnews', {
 mongoose.connect(MONGODB_URI, {
