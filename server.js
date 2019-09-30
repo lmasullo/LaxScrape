@@ -29,21 +29,12 @@ app.use(express.json());
 app.use(express.static('public'));
 
 //! Connect to the Mongo DB **********************************************
-// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
+// If deployed, use the deployed database. Otherwise use the local database
 const MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/laxnews';
 
-// const MONGODB_URI =
-// process.env.MONGODB_URI;
-
-// mongoose.connect(MONGODB_URI, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// });
-
 console.log(MONGODB_URI);
 
-// mongoose.connect('mongodb://127.0.0.1:27017/laxnews', {
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
