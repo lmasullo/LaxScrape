@@ -29,32 +29,11 @@ app.use(express.json());
 app.use(express.static('public'));
 
 //! Connect to the Mongo DB **********************************************
-// mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
-
-// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 const MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://localhost:27017/laxnews';
 
 mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-// const url =
-// 'mongodb://heroku_6m9t9glz:Laxman27@ds153824.mlab.com:53824/heroku_6m9t9glz';
-
-// const url2 = 'mongodb://localhost/laxnews';
-
-// const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost/laxnews';
-// const MONGODB_URI = url || 'mongodb://localhost:27017/laxnews';
-
-// mongoose.connect(MONGODB_URI, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// });
-
-mongoose.connect('mongodb://127.0.0.1:27017/laxnews', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
