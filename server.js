@@ -1,3 +1,4 @@
+//! Dependencies **********************************************
 // Dotenv to store passwords
 // require('dotenv').config();
 
@@ -6,21 +7,19 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 // Our scraping tools
-// Axios is a promised-based http library, similar to jQuery's Ajax method
-// It works on the client and on the server
 const axios = require('axios');
 const cheerio = require('cheerio');
 
 // Require all models
-// let db = require('./models');
+const db = require('./models');
 
-const PORT = process.env.PORT || 3000;
+// Set the port
+const PORT = process.env.PORT || 27017;
 
 // Initialize Express
 const app = express();
 
 // Configure middleware
-
 // Use morgan logger for logging requests
 // app.use(logger('dev'));
 // Parse request body as JSON
@@ -29,25 +28,204 @@ app.use(express.json());
 // Make public a static folder
 app.use(express.static('public'));
 
-// Connect to the Mongo DB
+//! Connect to the Mongo DB **********************************************
 // mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
 
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
-
-const url =
-  'mongodb://heroku_6m9t9glz:Laxman27@ds153824.mlab.com:53824/heroku_6m9t9glz';
-
-// const url2 = 'mongodb://localhost/laxnews';
-
-// const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost/laxnews';
-const MONGODB_URI = url || 'mongodb://localhost/laxnews';
+// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
+const MONGODB_URI =
+  process.env.MONGODB_URI || 'mongodb://localhost:27017/laxnews';
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-// Start the server
+// const url =
+// 'mongodb://heroku_6m9t9glz:Laxman27@ds153824.mlab.com:53824/heroku_6m9t9glz';
+
+// const url2 = 'mongodb://localhost/laxnews';
+
+// const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost/laxnews';
+// const MONGODB_URI = url || 'mongodb://localhost:27017/laxnews';
+
+// mongoose.connect(MONGODB_URI, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
+
+mongoose.connect('mongodb://127.0.0.1:27017/laxnews', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+//! Routes **********************************************
+
+// A GET route for scraping the uslaxmagazine website
+app.get('/scrape', function(req, res) {
+  // Clear the the Articles Collection first
+  db.Article.deleteMany({})
+    .then(function(dbArticleRem) {
+      // View the added result in the console
+      console.log(dbArticleRem);
+    })
+    .catch(function(err) {
+      // If an error occurred, log it
+      console.log(err);
+    });
+
+  // First, we grab the body of the html with axios
+  axios
+    .get('https://www.uslaxmagazine.com/college/men/')
+    .then(function(response) {
+      // Then, we load that into cheerio and save it to $ for a shorthand selector
+      const $ = cheerio.load(response.data);
+
+      // Get the span with class .field-content, then go into children to get the title (h4 within the a tag) and the link (first child a tag)
+      $('.field-content').each(function(i, element) {
+        // Save an empty result object
+        const result = {};
+
+        // Get the title
+        const newTitle = $(this)
+          .children('a')
+          .children('h4')
+          .text();
+
+        // If the result is empty, don't add to the result object
+        if (newTitle !== '') {
+          result.title = newTitle;
+
+          // Get the link to the article
+          const articleUrl = `https://www.uslaxmagazine.com${$(this)
+            .children()
+            .first()
+            .attr('href')}`;
+          result.link = articleUrl;
+
+          // Get the byline of the article
+          result.byLine = $(this)
+            .children('h4')
+            .children('span');
+
+          // Create a new Article using the `result` object built from scraping
+          db.Article.create(result)
+            .then(function(dbArticle) {
+              // View the added result in the console
+              console.log(dbArticle);
+            })
+            .catch(function(err) {
+              // If an error occurred, log it
+              console.log(err);
+            });
+        } // End if is Not blank
+      });
+
+      // Send a message to the client
+      res.send('Scrape Complete');
+    });
+});
+
+// Route for getting all Articles from the db
+app.get('/articles', function(req, res) {
+  // Grab every document in the Articles collection
+  db.Article.find({})
+    .then(function(dbArticle) {
+      // If we were able to successfully find Articles, send them back to the client
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
+});
+
+// Route for saving/updating an Article's associated Note
+app.post('/articles/:id', function(req, res) {
+  // Create a new note and pass the req.body to the entry
+  db.Note.create(req.body)
+    .then(function(dbNote) {
+      // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
+      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
+      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
+      return db.Article.findOneAndUpdate(
+        { _id: req.params.id },
+        { note: dbNote._id },
+        { new: true }
+      );
+    })
+    .then(function(dbArticle) {
+      // If we were able to successfully update an Article, send it back to the client
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
+});
+
+// Route for grabbing a specific Article by id, populate it with it's note
+app.get('/articles/:id', function(req, res) {
+  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
+  db.Article.findOne({ _id: req.params.id })
+    // ..and populate all of the notes associated with it
+    .populate('note')
+    .then(function(dbArticle) {
+      // If we were able to successfully find an Article with the given id, send it back to the client
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
+});
+
+// DELETE route for deleting Notes
+app.post('/note/:id', function(req, res) {
+  console.log(req.params.id);
+
+  const valid = mongoose.Types.ObjectId.isValid(req.params.id);
+  console.log(valid);
+
+  // db.Article.findOneAndUpdate(filter, update);
+
+  if (valid) {
+    // process your code here
+    console.log('valid');
+  } else {
+    // the id is not a valid ObjectId
+    console.log('Not valid');
+  }
+
+  db.Article.findOneAndUpdate(
+    { _id: req.params.id },
+    { note: null },
+    { new: true }
+  )
+    .then(function(dbArticle) {
+      // If we were able to successfully update an Article, send it back to the client
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
+
+  // db.RepoTag.destroy({
+  //   where: {
+  //     tagID: req.params.id,
+  //   },
+  // }).then(function(dbRepoTags) {
+  //   res.json(dbRepoTags);
+  // });
+});
+
+//! ***************************************
+
+// todo Need to only add one note to the articles
+// todo I don't need the notes collection unless adding multiple notes
+
+//! Start the server **********************************************
 app.listen(PORT, function() {
   console.log(`App running on port ${PORT}!`);
 });
