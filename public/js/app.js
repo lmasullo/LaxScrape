@@ -49,15 +49,24 @@ function getArticles() {
   });
 } // End Get Articles
 
-// Click the Scrape New Articles Button
-$(document).on('click', '#btnScrape', function() {
-  console.log('btnScrape Clicked!');
+function scrapeArticles() {
+  $.get('/scrape', function(data) {
+    // OnLoad get the articles
+    console.log(data);
+    console.log('call getArticles');
+    getArticles();
+  });
+}
 
+// Click the Scrape New Articles Button
+$(document).on('click', '#btnScrape', function(e) {
+  console.log('btnScrape Clicked!');
+  e.preventDefault();
   // Empty the Articles div
   $('#articles').empty();
 
   // Now call the function to get the Articles
-  getArticles();
+  scrapeArticles();
 });
 
 // Click the Add a Note
@@ -260,5 +269,5 @@ $(document).ready(function() {
   $('.alert').hide();
 });
 
-// OnLoad get the articles
-getArticles();
+// Call Scrape the articles function on load
+scrapeArticles();
