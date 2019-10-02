@@ -38,6 +38,7 @@ console.log(MONGODB_URI);
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  useFindAndModify: false,
 });
 
 //! Routes **********************************************
@@ -111,6 +112,7 @@ app.get('/scrape', function(req, res) {
 app.get('/articles', function(req, res) {
   // Grab every document in the Articles collection
   db.Article.find({})
+    .populate('notes')
     .then(function(dbArticle) {
       // If we were able to successfully find Articles, send them back to the client
       res.json(dbArticle);
@@ -124,14 +126,32 @@ app.get('/articles', function(req, res) {
 // Route for saving/updating an Article's associated Note
 app.post('/articles/:id', function(req, res) {
   // Create a new note and pass the req.body to the entry
+
+  console.log('Req Body', req.body);
+
   db.Note.create(req.body)
     .then(function(dbNote) {
       // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
       // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
       // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
+
+      // Find the Article
+      // db.Article.findOne({ _id: req.params.id }, function(err, article) {
+      //   console.log('Article', article);
+      //   // Now insert the note id into the array of notes
+      //   article.note.push(dbNote._id);
+      //   // article.save();
+      // });
+
+      // Users.findOneAndUpdate(
+      //   { name: req.user.name },
+      //   { $push: { friends: friend } }
+      // );
+
+      // Find the article and add the note id to the array of notes
       return db.Article.findOneAndUpdate(
         { _id: req.params.id },
-        { note: dbNote._id },
+        { $push: { notes: dbNote._id } },
         { new: true }
       );
     })
@@ -150,7 +170,7 @@ app.get('/articles/:id', function(req, res) {
   // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
   db.Article.findOne({ _id: req.params.id })
     // ..and populate all of the notes associated with it
-    .populate('note')
+    .populate('notes')
     .then(function(dbArticle) {
       // If we were able to successfully find an Article with the given id, send it back to the client
       res.json(dbArticle);

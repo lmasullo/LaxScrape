@@ -49,6 +49,16 @@ function getArticles() {
   });
 } // End Get Articles
 
+// Function to call the scrape articles route
+function scrapeArticles() {
+  $.get('/scrape', function(data) {
+    // On load get articles
+    console.log('Call getArticles');
+    // After scrape is finished, get the articles
+    getArticles();
+  });
+}
+
 // Click the Scrape New Articles Button
 $(document).on('click', '#btnScrape', function() {
   console.log('btnScrape Clicked!');
@@ -56,8 +66,8 @@ $(document).on('click', '#btnScrape', function() {
   // Empty the Articles div
   $('#articles').empty();
 
-  // Now call the function to get the Articles
-  getArticles();
+  // Now call the function to scrape and get the Articles
+  scrapeArticles();
 });
 
 // Click the Add a Note
@@ -76,32 +86,32 @@ $(document).on('click', '.note', function() {
 
   // Add the article ID to the Save and Delete buttons
   $('.btnSave').attr('id', id);
-  $('.btnDel').attr('id', id);
+  // $('.btnDel').attr('id', id);
 
   // Make the delete button hidden
-  $('.btnDel').css('display', 'none');
+  // $('.btnDel').css('display', 'none');
 
   // Now make an ajax call for the Article
-  $.ajax({
-    method: 'GET',
-    url: `/articles/${id}`,
-  })
-    // Add the note information to the Modal
-    .then(function(data) {
-      console.log(data);
+  // $.ajax({
+  //   method: 'GET',
+  //   url: `/articles/${id}`,
+  // })
+  // Add the note information to the Modal
+  // .then(function(data) {
+  // console.log(data);
 
-      // If there's a note in the article, update the modal
-      if (data.note) {
-        // Update the modal title
-        $('#modalNoteLabel').text(`Edit the Note for Article ID: ${id}`);
+  // If there's a note in the article, update the modal
+  // if (data.note) {
+  //   // Update the modal title
+  //   $('#modalNoteLabel').text(`Edit the Note for Article ID: ${id}`);
 
-        // Update the txtNote field
-        $('#txtNote').val(data.note.note);
+  //   // Update the txtNote field
+  //   $('#txtNote').val(data.note.note);
 
-        // Make the Delete button visible
-        $('.btnDel').css('display', 'inline');
-      }
-    });
+  //   // Make the Delete button visible
+  //   // $('.btnDel').css('display', 'inline');
+  // }
+  // });
 });
 
 // Click the Save Changes Modal Button
@@ -139,33 +149,34 @@ $(document).on('click', '.btnSave', function() {
   $('#txtNote').val('');
 });
 
+// todo Delete!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Click the Delete Note Modal Button
-$(document).on('click', '.btnDel', function(e) {
-  console.log('Delete Button Clicked');
-  e.preventDefault();
+// $(document).on('click', '.btnDel', function(e) {
+//   console.log('Delete Button Clicked');
+//   e.preventDefault();
 
-  console.log(this.id);
+//   console.log(this.id);
 
-  // Grab the id associated with the article from the submit button
-  const artID = this.id;
+//   // Grab the id associated with the article from the submit button
+//   const artID = this.id;
 
-  // Run a POST request to change the note, using what's entered in the inputs
-  $.ajax({
-    method: 'POST',
-    url: `/note/${artID}`,
-    data: {
-      note: '',
-    },
-  })
-    // With that done
-    .then(function(data) {
-      // Log the response
-      console.log(data);
+//   // Run a POST request to change the note, using what's entered in the inputs
+//   $.ajax({
+//     method: 'POST',
+//     url: `/note/${artID}`,
+//     data: {
+//       note: '',
+//     },
+//   })
+//     // With that done
+//     .then(function(data) {
+//       // Log the response
+//       console.log(data);
 
-      // Close the modal
-      $('#modalNote').modal('toggle');
-    });
-});
+//       // Close the modal
+//       $('#modalNote').modal('toggle');
+//     });
+// });
 
 //! ????????????????????????????????????????
 
@@ -260,5 +271,5 @@ $(document).ready(function() {
   $('.alert').hide();
 });
 
-// OnLoad get the articles
-getArticles();
+// OnLoad/scrape and get the articles
+scrapeArticles();
