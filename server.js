@@ -145,47 +145,74 @@ app.post('/articles/:id', function(req, res) {
     });
 });
 
-// Route for grabbing a specific Article by id, populate it with it's note
-app.get('/articles/:id', function(req, res) {
-  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-  db.Article.findOne({ _id: req.params.id })
-    // ..and populate all of the notes associated with it
-    .populate('note')
-    .then(function(dbArticle) {
-      // If we were able to successfully find an Article with the given id, send it back to the client
-      res.json(dbArticle);
-    })
-    .catch(function(err) {
-      // If an error occurred, send it to the client
-      res.json(err);
-    });
-});
-
 // DELETE route for deleting Notes
-app.post('/note/:id', function(req, res) {
-  console.log(req.params.id);
+app.post('/note/:noteID', function(req, res) {
+  console.log('NoteID', req.params.noteID);
 
-  const valid = mongoose.Types.ObjectId.isValid(req.params.id);
-  console.log(valid);
+  // todo Need to delete the reference in the article
 
-  // db.Article.findOneAndUpdate(filter, update);
+  db.Note.deleteOne({ _id: req.params.noteID })
+    .then(function(dbNote) {
+      // If we were able to successfully delete the note, send it back
+      res.json(dbNote);
 
-  if (valid) {
-    // process your code here
-    console.log('valid');
-  } else {
-    // the id is not a valid ObjectId
-    console.log('Not valid');
-  }
+      console.log('DB Note', dbNote);
 
-  db.Article.findOneAndUpdate(
-    { _id: req.params.id },
-    { note: null },
-    { new: true }
-  )
-    .then(function(dbArticle) {
-      // If we were able to successfully update an Article, send it back to the client
-      res.json(dbArticle);
+      // db.Article.findOne({ notes: req.params.noteID }, function(err, doc) {
+      //   console.log('Doc', doc);
+
+      //   doc.update({ $set: { title: 'test' } });
+      // });
+      // const query = { notes: req.params.noteID };
+      // db.Article.findOneAndUpdate(query, { notes: 'None' }, function(err, doc) {
+      //   console.log(doc);
+      // });
+
+      // db.collection.update({...}, {$inc: {"answer.0.votes": 1}})
+      //! this works, but erases, need to do by index
+      const query = { notes: req.params.noteID };
+      db.Article.findOneAndUpdate(
+        query,
+        { notes: { 'notes.0.votes': 1 } },
+        function(err, doc) {
+          console.log(doc);
+        }
+      );
+
+      // const query = { notes: req.params.noteID };
+      // db.Article.findOneAndUpdate(query, { notes: 'test' }, function(
+      //   err,
+      //   doc
+      // ) {
+      //   console.log(doc);
+      // });
+
+      // db.Article.update(
+      //   { notes: req.params.noteID },
+      //   { $set: { title: 'test' } },
+      //   { upsert: true },
+      //   function(err) {
+      //     console.log('Updated');
+      //   }
+      // );
+
+      // db.Article.findOne({ notes: req.params.noteID }, function(err, doc) {
+      //   // Get the array of notes
+      //   console.log('Doc', doc);
+
+      //   Contact.update({phone:request.phone}, {$set: { phone: request.phone }}, {upsert: true}, function(err){...})
+
+      //   // Remove the deleted note
+      //   // doc.notes.splice(doc.notes.indexOf(req.params.noteID), 1);
+
+      //   // const index = doc.notes.indexOf(req.params.noteID);
+      //   // doc.notes.splice(index, 1);
+      //   // console.log(index);
+      //   // doc.notes[index] = 'test';
+      //   // console.log(doc.notes[index]);
+
+      //   // doc[0].notes.pull({ _id: req.params.noteID }); // removed
+      // });
     })
     .catch(function(err) {
       // If an error occurred, send it to the client
