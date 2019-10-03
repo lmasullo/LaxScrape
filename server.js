@@ -162,18 +162,61 @@ app.post('/note/:noteID', function(req, res) {
 
       console.log('DB Note', dbNote);
 
-      db.Article.findOne({ notes: req.params.noteID }, function(err, doc) {
-        // Get the array of notes
-        console.log('Doc', doc.notes);
+      // db.Article.findOne({ notes: req.params.noteID }, function(err, doc) {
+      //   console.log('Doc', doc);
 
-        // Remove the deleted note
-        // doc.notes.splice(doc.notes.indexOf(req.params.noteID), 1);
+      //   doc.update({ $set: { title: 'test' } });
+      // });
+      // const query = { notes: req.params.noteID };
+      // db.Article.findOneAndUpdate(query, { notes: 'None' }, function(err, doc) {
+      //   console.log(doc);
+      // });
 
-        const index = doc.notes.indexOf(req.params.noteID);
-        doc.notes.splice(index, 1);
+      // db.collection.update({...}, {$inc: {"answer.0.votes": 1}})
+      //! this works, but erases, need to do by index
+      const query = { notes: req.params.noteID };
+      db.Article.findOneAndUpdate(
+        query,
+        { notes: { 'notes.0.votes': 1 } },
+        function(err, doc) {
+          console.log(doc);
+        }
+      );
 
-        // doc[0].notes.pull({ _id: req.params.noteID }); // removed
-      });
+      // const query = { notes: req.params.noteID };
+      // db.Article.findOneAndUpdate(query, { notes: 'test' }, function(
+      //   err,
+      //   doc
+      // ) {
+      //   console.log(doc);
+      // });
+
+      // db.Article.update(
+      //   { notes: req.params.noteID },
+      //   { $set: { title: 'test' } },
+      //   { upsert: true },
+      //   function(err) {
+      //     console.log('Updated');
+      //   }
+      // );
+
+      // db.Article.findOne({ notes: req.params.noteID }, function(err, doc) {
+      //   // Get the array of notes
+      //   console.log('Doc', doc);
+
+      //   Contact.update({phone:request.phone}, {$set: { phone: request.phone }}, {upsert: true}, function(err){...})
+
+      //   // Remove the deleted note
+      //   // doc.notes.splice(doc.notes.indexOf(req.params.noteID), 1);
+
+      //   // const index = doc.notes.indexOf(req.params.noteID);
+      //   // doc.notes.splice(index, 1);
+      //   // console.log(index);
+      //   // doc.notes[index] = 'test';
+      //   // console.log(doc.notes[index]);
+
+      //   // doc[0].notes.pull({ _id: req.params.noteID }); // removed
+      // });
     })
     .catch(function(err) {
       // If an error occurred, send it to the client
