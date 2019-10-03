@@ -123,31 +123,15 @@ app.get('/articles', function(req, res) {
     });
 });
 
-// Route for saving/updating an Article's associated Note
+// Route for Creating a Note an Article's associated Note
 app.post('/articles/:id', function(req, res) {
   // Create a new note and pass the req.body to the entry
-
-  console.log('Req Body', req.body);
-
+  // Creates a new note, then uses the new note id to enter in the articles notes array
   db.Note.create(req.body)
     .then(function(dbNote) {
       // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
       // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
       // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
-
-      // Find the Article
-      // db.Article.findOne({ _id: req.params.id }, function(err, article) {
-      //   console.log('Article', article);
-      //   // Now insert the note id into the array of notes
-      //   article.note.push(dbNote._id);
-      //   // article.save();
-      // });
-
-      // Users.findOneAndUpdate(
-      //   { name: req.user.name },
-      //   { $push: { friends: friend } }
-      // );
-
       // Find the article and add the note id to the array of notes
       return db.Article.findOneAndUpdate(
         { _id: req.params.id },
@@ -165,63 +149,55 @@ app.post('/articles/:id', function(req, res) {
     });
 });
 
-// Route for grabbing a specific Article by id, populate it with it's note
-app.get('/articles/:id', function(req, res) {
-  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-  db.Article.findOne({ _id: req.params.id })
-    // ..and populate all of the notes associated with it
-    .populate('notes')
-    .then(function(dbArticle) {
-      // If we were able to successfully find an Article with the given id, send it back to the client
-      res.json(dbArticle);
-    })
-    .catch(function(err) {
-      // If an error occurred, send it to the client
-      res.json(err);
-    });
-});
-
 // DELETE route for deleting Notes
-app.post('/note/:id', function(req, res) {
-  console.log(req.params.id);
+app.post('/note/:noteID', function(req, res) {
+  console.log('NoteID', req.params.noteID);
 
-  const valid = mongoose.Types.ObjectId.isValid(req.params.id);
-  console.log(valid);
+  // todo Need to delete the reference in the article
 
-  // db.Article.findOneAndUpdate(filter, update);
+  db.Note.deleteOne({ _id: req.params.noteID })
+    .then(function(dbNote) {
+      // If we were able to successfully delete the note, send it back
+      res.json(dbNote);
 
-  if (valid) {
-    // process your code here
-    console.log('valid');
-  } else {
-    // the id is not a valid ObjectId
-    console.log('Not valid');
-  }
+      console.log('DB Note', dbNote);
 
-  db.Article.findOneAndUpdate(
-    { _id: req.params.id },
-    { note: null },
-    { new: true }
-  )
-    .then(function(dbArticle) {
-      // If we were able to successfully update an Article, send it back to the client
-      res.json(dbArticle);
+      db.Article.findOne({ notes: req.params.noteID }, function(err, doc) {
+        // Get the array of notes
+        console.log('Doc', doc.notes);
+
+        // Remove the deleted note
+        // doc.notes.splice(doc.notes.indexOf(req.params.noteID), 1);
+
+        const index = doc.notes.indexOf(req.params.noteID);
+        doc.notes.splice(index, 1);
+
+        // doc[0].notes.pull({ _id: req.params.noteID }); // removed
+      });
     })
     .catch(function(err) {
       // If an error occurred, send it to the client
       res.json(err);
     });
-
-  // db.RepoTag.destroy({
-  //   where: {
-  //     tagID: req.params.id,
-  //   },
-  // }).then(function(dbRepoTags) {
-  //   res.json(dbRepoTags);
-  // });
 });
 
 //! ***************************************
+
+// Route for grabbing a specific Article by id, populate it with it's note
+// app.get('/articles/:id', function(req, res) {
+//   // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
+//   db.Article.findOne({ _id: req.params.id })
+//     // ..and populate all of the notes associated with it
+//     .populate('notes')
+//     .then(function(dbArticle) {
+//       // If we were able to successfully find an Article with the given id, send it back to the client
+//       res.json(dbArticle);
+//     })
+//     .catch(function(err) {
+//       // If an error occurred, send it to the client
+//       res.json(err);
+//     });
+// });
 
 // todo Need to only add one note to the articles
 // todo I don't need the notes collection unless adding multiple notes

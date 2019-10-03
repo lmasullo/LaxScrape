@@ -1,7 +1,12 @@
 // Function to get all the Articles
 function getArticles() {
   // Grab the articles as a json
-  $.getJSON('/articles', function(data) {
+  $.get('/articles', function(data) {
+    console.log(data);
+
+    // Clear the articles div
+    $('#articles').empty();
+
     // For each one
     for (let i = 0; i < data.length; i++) {
       // Build a card
@@ -26,11 +31,32 @@ function getArticles() {
       btnNote.text('Add a Note');
       cardHeader.html(data[i].title);
       p.html(data[i].byLine);
+      // const divNotes = $('<div>');
 
-      // Append the items of the card
-      card.append(cardHeader);
-      cardBody.append(p);
-      cardBody.append(btnLink, btnNote);
+      // Append the items of the card to the card body
+      cardBody.append(cardHeader, p, btnLink, btnNote);
+
+      // Get the notes for this article
+      const arrNotes = data[i].notes;
+      console.log(arrNotes);
+
+      // Loop over the notes
+      for (let i = 0; i < arrNotes.length; i++) {
+        console.log('Array Notes', arrNotes[i].note);
+        const divNote = $('<div>');
+        divNote.addClass('divNote');
+        const imgDel = $('<img>');
+        imgDel.addClass('delete');
+        imgDel.attr('src', '../images/delete.png');
+        imgDel.attr('alt', 'Delete Note');
+        imgDel.attr('noteID', arrNotes[i]._id);
+        imgDel.attr('artID', data[i]._id);
+        divNote.text(arrNotes[i].note);
+        divNote.append(imgDel);
+        cardBody.append(divNote);
+      }
+
+      // Append the card body to the card
       card.append(cardBody);
 
       // Append the card to the articles div
@@ -143,10 +169,56 @@ $(document).on('click', '.btnSave', function() {
 
       // Close the modal
       $('#modalNote').modal('toggle');
+
+      // Get the articles again to show the note
+      getArticles();
     });
 
   // Clear the Note field
   $('#txtNote').val('');
+});
+
+// Click the Delete Note Button
+$(document).on('click', '.delete', function() {
+  console.log('Delete Note Clicked');
+  console.log(this);
+
+  console.log($(this).attr('noteid'));
+  console.log($(this).attr('artid'));
+  const noteID = $(this).attr('noteid');
+  // const artID = $(this).attr('artid');
+
+  // $.ajax({
+  //   type: 'POST',
+  //   url: `/articles/${artID}`,
+  //   data: {
+  //     note: '',
+  //   },
+  // }).then(function(data) {
+  //   // Log the response
+  //   console.log(data);
+
+  //   // Close the modal
+  //   // $('#modalNote').modal('toggle');
+  // });
+
+  $.post(`/note/${noteID}`, function(data) {
+    // $.ajax({
+    // method: 'POST',
+    // url: `/note/${noteID}`,
+    // data: {
+    //   note: '',
+    // },
+    console.log(data);
+  });
+  // // With that done
+  // .then(function(data) {
+  //   // Log the response
+  //   console.log(data);
+
+  //   // Close the modal
+  //   // $('#modalNote').modal('toggle');
+  // });
 });
 
 // todo Delete!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

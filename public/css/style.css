@@ -33,6 +33,15 @@
 
 .byLine {
   font-size: 12px;
+  margin-top: 5px;
+}
+
+.divNote {
+  /* border: solid black 1px; */
+}
+
+img {
+  margin-left: 10px;
 }
 
 .alert-heading {
