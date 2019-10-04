@@ -1,6 +1,6 @@
 // Function to get all the Articles
 function getArticles() {
-  // Grab the articles as a json
+  // Grab the articles
   $.get('/articles', function(data) {
     // Clear the articles div
     $('#articles').empty();
