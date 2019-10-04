@@ -1,6 +1,6 @@
 # Project Title
 
-** LaxScraper **
+**LaxScraper**
 
 ## Description:
 
