@@ -39,7 +39,7 @@ Scrapes the uslaxmagazine.com for Men's College Lacrosse news
 
 ![alt text](public/images/lax.png "Home Page")
 
-* The goal is to click on each image just once. As you click on an image your score will increment as long as you haven't clicked on it before. Try to get all 12! If you click on an image a second time, the images will shake, and the game will restart.
+* The scraper pulls in the new articles from the www.uslaxmagazine.com site and displays them. You can add/edit/delete notes for each article.
 
 ## GitHub Repo
 https://github.com/lmasullo/LaxScraper
