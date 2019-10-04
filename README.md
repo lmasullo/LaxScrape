@@ -22,10 +22,10 @@ Scrapes the uslaxmagazine.com for Men's College Lacrosse news
 ## NPM Packages
 * Node.js
 * Express
-* mongoDB
-* mongoose
-* axios
-* cheerio
+* MongoDB
+* Mongoose
+* Axios
+* Cheerio
 
 ## Instructions
 
