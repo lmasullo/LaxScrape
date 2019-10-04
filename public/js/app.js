@@ -69,9 +69,22 @@ function getArticles() {
       // Append the card to the articles div
       $('#articles').append(card);
     }
+  });
+} // End Get Articles
+
+// Function to call the scrape articles route
+function scrapeArticles() {
+  $.get('/scrape', function(data) {
+    console.log('Data', data);
+
+    // After scrape is finished, get the articles
+    console.log('Call getArticles');
+    getArticles();
 
     // Set the number of new articles to display
     const numArticles = data.length;
+
+    // Set the alert text
     $('#alertText').html(`Added ${numArticles} new articles!`);
 
     // Show the alert and then automatically dismiss after 1 sec
@@ -79,18 +92,6 @@ function getArticles() {
     setTimeout(function() {
       $('.alert').hide();
     }, 1000);
-  });
-} // End Get Articles
-
-// Function to call the scrape articles route
-function scrapeArticles() {
-  $.get('/scrape', function(data) {
-    console.log(data);
-
-    // On load get articles
-    console.log('Call getArticles');
-    // After scrape is finished, get the articles
-    getArticles();
   });
 }
 
