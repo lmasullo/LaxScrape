@@ -29,7 +29,7 @@ Scrapes the uslaxmagazine.com for Men's College Lacrosse news
 
 ## Instructions
 
-* Clone this repository at https://github.com/lmasullo/clicky
+* Clone this repository at https://github.com/lmasullo/LaxScraper
 * Run npm install in the terminal
 * Run node server
 * Open your browser to localhost:3000
@@ -42,7 +42,7 @@ Scrapes the uslaxmagazine.com for Men's College Lacrosse news
 * The goal is to click on each image just once. As you click on an image your score will increment as long as you haven't clicked on it before. Try to get all 12! If you click on an image a second time, the images will shake, and the game will restart.
 
 ## GitHub Repo
-https://github.com/lmasullo/clicky
+https://github.com/lmasullo/LaxScraper
 
 ## Versioning
 
