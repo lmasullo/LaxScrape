@@ -56,6 +56,7 @@ function getArticles() {
         imgEdit.attr('noteID', arrNotes[i]._id);
         imgEdit.attr('data-toggle', 'modal');
         imgEdit.attr('data-target', '#modalNote');
+        // Append the icons and note to card body
         divNote.text(arrNotes[i].note);
         divNote.append(imgDel);
         divNote.append(imgEdit);
